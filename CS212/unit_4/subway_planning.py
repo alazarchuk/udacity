@@ -120,6 +120,6 @@ def test_ride():
                 'alewife', 'davis', 'porter', 'harvard', 'central', 'mit', 'charles',
                 'park', 'downtown', 'state', 'aquarium', 'maverick', 'airport', 'suffolk', 'revere', 'wonderland'])
     assert len(path_states(longest_ride(boston))) == 16
-    return 'test_ride passes'
+    return 'test_ride passes!'
 
 print test_ride()
