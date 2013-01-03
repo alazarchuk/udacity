@@ -30,8 +30,19 @@ def pig_actions_d(state):
     # which is 1 or 2 to denote the value of the game, or 'double'
     # for the moment at which one player has doubled and is waiting
     # for the other to accept or decline
-    (p, me, you, pending, double) = state 
-    # your code here
+    (p, me, you, pending, double) = state
+    
+    defaults = set(["roll", "hold"])
+    if double == 'double':
+        defaults = set(["accept", "decline"])
+    else:
+        if pending == 0:
+            defaults.remove("hold")
+        if double == 1:
+            defaults.add("double")
+        
+    return defaults
+ 
 
 def strategy_d(state):
     # your code here
