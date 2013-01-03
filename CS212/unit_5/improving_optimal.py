@@ -39,22 +39,53 @@ def memo(f):
     _f.cache = cache
     return _f
 
+def roll(state, d):
+    """Apply the roll action to a state (and a die roll d) to yield a new state:
+    If d is 1, get 1 point (losing any accumulated 'pending' points),
+    and it is the other player's turn. If d > 1, add d to 'pending' points."""
+    (me, you, pending) = state
+    if d == 1:
+        return (you, me+1, 0) # pig out; other player's turn
+    else:
+        return (me, you, pending+d)  # accumulate die roll in pending
+
+def hold(state):
+    """Apply the hold action to a state to yield a new state:
+    Reap the 'pending' points and it becomes the other player's turn."""
+    (me, you, pending) = state
+    return (you, me+pending, 0)
+
+def Q_pig(state, action, Pwin):  
+    "The expected value of choosing action in state."
+    if action == 'hold':
+        return 1 - Pwin(hold(state))
+    if action == 'roll':
+        return (1 - Pwin(roll(state, 1))
+                + sum(Pwin(roll(state, d)) for d in (2,3,4,5,6))) / 6.
+    raise ValueError
+
+def pig_actions(pending):
+    "The legal actions from a state."
+    return ['roll', 'hold'] if pending else ['roll']
+
 goal = 40
 
 def Pwin2(state):
    """The utility of a state; here just the probability that an optimal player
    whose turn it is to move can win from the current state."""
    _, me, you, pending = state
-   return Pwin3(me, you, pending)
+   return Pwin3((me, you, pending))
 
 @memo
-def Pwin3(me, you, pending):
+def Pwin3(state):
+    me, you, pending = state
     if me + pending >= goal:
         return 1
     elif you >= goal:
         return 0
     else:
-        return 1 - (you + pending)*1.0/goal
+        return max(Q_pig([me, you, pending], action, Pwin3)
+                   for action in pig_actions(pending))
 
    
 def test():
